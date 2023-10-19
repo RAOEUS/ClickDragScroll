@@ -27,7 +27,7 @@ ToggleMode := false
 ToggleModeHotkey := "^!t" ; Default to Ctrl + Alt + T
 
 ; Reverse Scrolling: true to enable, false to disable
-ReverseScrolling := true
+ReverseScrolling := false
 
 ; ============================
 ; ========== START ===========
