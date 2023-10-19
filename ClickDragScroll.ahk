@@ -47,7 +47,7 @@ yInit := 0
 Hotkey, %InitiateDragButton%, InitiateDragCheck
 Hotkey, %InitiateDragButton% Up, InitiateDragStop
 Hotkey, %ToggleModeHotkey%, ToggleDragToScroll
-return ; End of auto-execute section
+return 
 
 ToggleDragToScroll:
   ToggleMode := !ToggleMode
@@ -62,7 +62,6 @@ ToggleDragToScroll:
 return
 
 InitiateDragCheck:
-  ; If ToggleMode is active, return
   if (ToggleMode) {
     return
   }
@@ -83,7 +82,7 @@ return
 InitiateDrag:
   SetTimer, InitiateDrag, Off ; Turn off this timer
   Dragging := true
-  ActiveMode := true ; Set ActiveMode to true
+  ActiveMode := true
   SetTimer, CheckMouseMove, 10 ; Start the movement check timer
 return
 
@@ -92,7 +91,7 @@ InitiateDragStop:
   SetTimer, InitiateDrag, Off ; Turn off the initiation timer
   if (Dragging) {
     Dragging := false
-    ActiveMode := ToggleMode ; Set ActiveMode based on ToggleMode state
+    ActiveMode := ToggleMode
     SetTimer, CheckMouseMove, Off
     Tooltip ; Hide tooltip
     return ; Prevent default click action
@@ -128,7 +127,6 @@ CheckMouseMove:
   accumulatedX += scrollSpeedX
 
   if (xDelta != 0 or yDelta != 0) {
-    ; Check for reverse scrolling
     if (ReverseScrolling) {
       yDelta := -yDelta
       xDelta := -xDelta
