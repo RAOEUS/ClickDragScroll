@@ -1,6 +1,6 @@
 # Click and Drag to Scroll
 
-This is a relatively basic Auto Hot Key script that allows you to:
+This is a relatively basic AutoHotKey script that allows you to:
 
 - Click and hold a mouse button (default Middle) and then move the cursor to scroll
   - Vertical, horizontal, and even diagonal scrolling works!
