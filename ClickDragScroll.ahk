@@ -8,11 +8,11 @@ InitiateDragButton := "MButton"
 
 ; Minimum cursor speed factor (for slow movements). 
 ; Increase for slower minimum speed, decrease for faster minimum speed.
-SlowSpeedFactor := 10 ; Adjust to control minimum speed (higher values slow it down)
+SlowSpeedFactor := 5 ; Adjust to control minimum speed (higher values slow it down)
 
 ; Fractional threshold for smoother scrolling at slow speeds.
 ; Smaller value makes scroll more sensitive to small mouse movements.
-FractionalThreshold := 0.4 ; Adjust to control sensitivity (smaller values are more sensitive)
+FractionalThreshold := 0.3 ; Adjust to control sensitivity (smaller values are more sensitive)
 
 ; Delay (in milliseconds) before drag-to-scroll mode is activated after holding the right mouse button.
 DragActivationDelay := 200
@@ -34,7 +34,7 @@ ReverseScrolling := false
 ScrollSensitivity := 0.3 ; Adjust to control overall scroll speed (lower values make it slower)
 
 ; Logarithmic power for scroll speed calculation.
-LogPower := 0.6 ; Adjust to control the scroll curve (lower values for slower speed at slow movements)
+LogPower := 0.7 ; Adjust to control the scroll curve (lower values for slower speed at slow movements)
 
 ; ============================
 ; ========== START ===========
