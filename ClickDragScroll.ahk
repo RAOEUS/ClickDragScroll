@@ -6,28 +6,39 @@
 ; Options: "RButton", "MButton"
 InitiateDragButton := "MButton"
 
-; Speed settings
-SlowSpeedFactor := 10 ; Increase for slower minimum speed, decrease for faster minimum speed
-AccelerationFactor := 1.2 ; Increase for more acceleration effect, decrease for less
+; Minimum cursor speed factor (for slow movements). 
+; Increase for slower minimum speed, decrease for faster minimum speed.
+SlowSpeedFactor := 20 ; Adjust to control minimum speed (higher values slow it down)
 
-; Fractional threshold for smoother scrolling at slow speeds
-; Smaller value makes scroll more sensitive to small mouse movements
-FractionalThreshold := 0.8
+; Acceleration factor for cursor speed.
+; Increase for more acceleration effect, decrease for less.
+AccelerationFactor := 1.2 ; Adjust to control acceleration (higher values accelerate more)
 
-; Delay (in milliseconds) before drag-to-scroll mode is activated after holding the right mouse button
+; Fractional threshold for smoother scrolling at slow speeds.
+; Smaller value makes scroll more sensitive to small mouse movements.
+FractionalThreshold := 0.2 ; Adjust to control sensitivity (smaller values are more sensitive)
+
+; Delay (in milliseconds) before drag-to-scroll mode is activated after holding the right mouse button.
 DragActivationDelay := 200
 
-; List of applications to exclude from drag-to-scroll
-;ExclusionList := ["Notepad", "Your Game Title", "Another App Title"]
+; List of applications to exclude from drag-to-scroll.
+; ExclusionList := ["Notepad", "Your Game Title", "Another App Title"]
 ExclusionList := []
 
-; Toggle Mode: true to enable, false to disable
+; Toggle Mode: true to enable, false to disable.
 ToggleMode := false
-; Hotkey to activate toggle mode
-ToggleModeHotkey := "^!t" ; Default to Ctrl + Alt + T
 
-; Reverse Scrolling: true to enable, false to disable
+; Hotkey to activate toggle mode (e.g., "^!t" for Ctrl + Alt + T).
+ToggleModeHotkey := "^!t"
+
+; Reverse Scrolling: true to enable, false to disable.
 ReverseScrolling := false
+
+; Scroll sensitivity multiplier.
+ScrollSensitivity := 0.2 ; Adjust to control overall scroll speed (lower values make it slower)
+
+; Logarithmic power for scroll speed calculation.
+LogPower := 0.5 ; Adjust to control the scroll curve (lower values for slower speed at slow movements)
 
 ; ============================
 ; ========== START ===========
@@ -119,8 +130,13 @@ CheckMouseMove:
   yDelta := yCur - yInit
 
   ; Calculate dynamic scroll speed based on cursor movement with configurable sensitivity
-  scrollSpeedY := (Abs(yDelta) / SlowSpeedFactor) ** AccelerationFactor
-  scrollSpeedX := (Abs(xDelta) / SlowSpeedFactor) ** AccelerationFactor
+  rawSpeedY := Abs(yDelta) / SlowSpeedFactor
+  rawSpeedX := Abs(xDelta) / SlowSpeedFactor
+
+  ; Using the natural logarithm function in AHK, similar to the Python's math.log1p function
+  ; The "+ 1" part is to ensure the value inside the log is always greater than zero
+  scrollSpeedY := ScrollSensitivity * (Log(rawSpeedY + 1) ** LogPower)
+  scrollSpeedX := ScrollSensitivity * (Log(rawSpeedX + 1) ** LogPower)
 
   ; Accumulate the scroll amounts
   accumulatedY += scrollSpeedY
@@ -132,26 +148,47 @@ CheckMouseMove:
       xDelta := -xDelta
     } 
 
-    ; Send wheel events based on the accumulated scroll amount using the fractional threshold
-    while (accumulatedY >= FractionalThreshold) {
-      if (yDelta > 0) {
-        Click, WheelDown
-      } else {
-        Click, WheelUp
+    ; Modified wheel event sending
+    if (FractionalThreshold = 0) {
+      if (accumulatedY > 0) {
+        if (yDelta > 0) {
+          Click, WheelDown
+        } else {
+          Click, WheelUp
+        }
       }
-      accumulatedY -= FractionalThreshold
-    }
 
-    Send, {Shift Down}
-    while (accumulatedX >= FractionalThreshold) {
-      if (xDelta > 0) {
-        Click, WheelDown
-      } else {
-        Click, WheelUp
+      Send, {Shift Down}
+      if (accumulatedX > 0) {
+        if (xDelta > 0) {
+          Click, WheelDown
+        } else {
+          Click, WheelUp
+        }
       }
-      accumulatedX -= FractionalThreshold
+      Send, {Shift Up}
+    } else {
+      ; Send wheel events based on the accumulated scroll amount using the fractional threshold
+      while (accumulatedY >= FractionalThreshold) {
+        if (yDelta > 0) {
+          Click, WheelDown
+        } else {
+          Click, WheelUp
+        }
+        accumulatedY -= FractionalThreshold
+      }
+
+      Send, {Shift Down}
+      while (accumulatedX >= FractionalThreshold) {
+        if (xDelta > 0) {
+          Click, WheelDown
+        } else {
+          Click, WheelUp
+        }
+        accumulatedX -= FractionalThreshold
+      }
+      Send, {Shift Up}
     }
-    Send, {Shift Up}
 
     ; Reset the mouse to the initial position
     MouseMove, %xInit%, %yInit%, 0
