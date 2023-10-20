@@ -53,6 +53,7 @@ ActiveMode := false
 xInit := 0
 yInit := 0
 Paused := false
+LastClickTime := 0 ;
 
 ; Dynamically set the hotkeys based on the setting
 Hotkey, %InitiateDragButton%, InitiateDragCheck
@@ -66,12 +67,12 @@ PauseResumeToggle:
   if Paused {
     ; If paused, stop any active timers and operations
     SetTimer, CheckMouseMove, Off
-    Tooltip, Drag-to-Scroll Paused
+    Tooltip, Script Paused
     ToggleMode := false
     Sleep, 1000
     Tooltip
   } else {
-    Tooltip, Drag-to-Scroll Resumed
+    Tooltip, Script Resumed
     Sleep, 1000
     Tooltip
   } return
@@ -79,18 +80,33 @@ PauseResumeToggle:
 ToggleDragToScroll:
   if(!Paused){
     ToggleMode := !ToggleMode
+
     if (ToggleMode) {
+      Tooltip, Scroll Mode: ON
       MouseGetPos, xInit, yInit
       ActiveMode := true
       SetTimer, CheckMouseMove, 10
     } else {
+      Tooltip, Scroll Mode: OFF
       ActiveMode := false
       SetTimer, CheckMouseMove, Off
     }
+    Sleep, 1000
+    Tooltip
   }
 return
 
 InitiateDragCheck:
+  ; Check if the time since the last click is less than 500ms
+  CurrentTime := A_TickCount
+  TimeSinceLastClick := CurrentTime - LastClickTime
+  LastClickTime := CurrentTime ; Update the time of the last click
+
+  if (TimeSinceLastClick < 500) { ; If the time since the last click is less than 500ms
+    Goto, ToggleDragToScroll ; Jump to the ToggleDragToScroll label
+    return
+  }
+
   if (ToggleMode || Paused) {
     return
   }
