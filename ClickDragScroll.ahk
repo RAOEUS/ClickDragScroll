@@ -6,6 +6,9 @@
 ; Options: "RButton", "MButton"
 InitiateDragButton := "MButton"
 
+; Keyboard combo to toggle drag-to-scroll script
+PauseResume := "^!p" ; Ctrl + Alt + P
+
 ; Minimum cursor speed factor (for slow movements). 
 ; Increase for slower minimum speed, decrease for faster minimum speed.
 SlowSpeedFactor := 5 ; Adjust to control minimum speed (higher values slow it down)
@@ -49,27 +52,46 @@ Dragging := false
 ActiveMode := false
 xInit := 0
 yInit := 0
+Paused := false
 
 ; Dynamically set the hotkeys based on the setting
 Hotkey, %InitiateDragButton%, InitiateDragCheck
 Hotkey, %InitiateDragButton% Up, InitiateDragStop
 Hotkey, %ToggleModeHotkey%, ToggleDragToScroll
+Hotkey, %PauseResume%, PauseResumeToggle
 return 
 
-ToggleDragToScroll:
-  ToggleMode := !ToggleMode
-  if (ToggleMode) {
-    MouseGetPos, xInit, yInit
-    ActiveMode := true
-    SetTimer, CheckMouseMove, 10
-  } else {
-    ActiveMode := false
+PauseResumeToggle:
+  Paused := !Paused
+  if Paused {
+    ; If paused, stop any active timers and operations
     SetTimer, CheckMouseMove, Off
+    Tooltip, Drag-to-Scroll Paused
+    ToggleMode := false
+    Sleep, 1000
+    Tooltip
+  } else {
+    Tooltip, Drag-to-Scroll Resumed
+    Sleep, 1000
+    Tooltip
+  } return
+
+ToggleDragToScroll:
+  if(!Paused){
+    ToggleMode := !ToggleMode
+    if (ToggleMode) {
+      MouseGetPos, xInit, yInit
+      ActiveMode := true
+      SetTimer, CheckMouseMove, 10
+    } else {
+      ActiveMode := false
+      SetTimer, CheckMouseMove, Off
+    }
   }
 return
 
 InitiateDragCheck:
-  if (ToggleMode) {
+  if (ToggleMode || Paused) {
     return
   }
 
@@ -87,6 +109,9 @@ InitiateDragCheck:
 return
 
 InitiateDrag:
+  if(Paused){
+    return
+  }
   SetTimer, InitiateDrag, Off ; Turn off this timer
   Dragging := true
   ActiveMode := true
@@ -117,7 +142,7 @@ accumulatedY := 0
 accumulatedX := 0
 
 CheckMouseMove:
-  if (!ActiveMode) {
+  if (!ActiveMode || Paused) {
     return
   }
 
