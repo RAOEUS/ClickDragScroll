@@ -24,9 +24,11 @@ DragActivationDelay := 200
 ; ExclusionList := ["Notepad", "Your Game Title", "Another App Title"]
 ExclusionList := []
 
-; Toggle Mode: true to enable, false to disable.
-ToggleMode := false
+; Enable or disable double-clicking the InitiateDragButton to toggle scroll mode.
+EnableDoubleClickToggle := true ; Set to true to enable, false to disable
 
+; Enable or disable the hotkey for toggling scroll mode.
+EnableHotkeyToggle := true ; Set to true to enable, false to disable
 ; Hotkey to activate toggle mode (e.g., "^!t" for Ctrl + Alt + T).
 ToggleModeHotkey := "^!t"
 
@@ -53,12 +55,15 @@ ActiveMode := false
 xInit := 0
 yInit := 0
 Paused := false
-LastClickTime := 0 ;
+LastClickTime := 0
+ToggleMode := false
 
 ; Dynamically set the hotkeys based on the setting
 Hotkey, %InitiateDragButton%, InitiateDragCheck
 Hotkey, %InitiateDragButton% Up, InitiateDragStop
-Hotkey, %ToggleModeHotkey%, ToggleDragToScroll
+if (EnableHotkeyToggle) { ; Only set the hotkey if it's enabled in the settings
+  Hotkey, %ToggleModeHotkey%, ToggleDragToScroll
+}
 Hotkey, %PauseResume%, PauseResumeToggle
 return 
 
@@ -97,14 +102,17 @@ ToggleDragToScroll:
 return
 
 InitiateDragCheck:
-  ; Check if the time since the last click is less than 500ms
-  CurrentTime := A_TickCount
-  TimeSinceLastClick := CurrentTime - LastClickTime
-  LastClickTime := CurrentTime ; Update the time of the last click
+  ; If double-click toggle is enabled, check for double-click
+  if (EnableDoubleClickToggle) {
+    ; Check if the time since the last click is less than 500ms
+    CurrentTime := A_TickCount
+    TimeSinceLastClick := CurrentTime - LastClickTime
+    LastClickTime := CurrentTime ; Update the time of the last click
 
-  if (TimeSinceLastClick < 500) { ; If the time since the last click is less than 500ms
-    Goto, ToggleDragToScroll ; Jump to the ToggleDragToScroll label
-    return
+    if (TimeSinceLastClick < 500) { ; If the time since the last click is less than 500ms
+      Goto, ToggleDragToScroll ; Jump to the ToggleDragToScroll label
+      return
+    }
   }
 
   if (ToggleMode || Paused) {
