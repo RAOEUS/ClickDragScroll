@@ -13,7 +13,7 @@ INITIATE_DRAG_BUTTON = Button.middle
 
 # Hotkey to toggle the drag-to-scroll mode.
 # This example uses CTRL+ALT+T.
-TOGGLE_HOTKEY = {keyboard.Key.ctrl, keyboard.Key.alt, keyboard.KeyCode.from_char("t")}
+TOGGLE_HOTKEY = {keyboard.Key.ctrl, keyboard.Key.shift, keyboard.Key.f12}
 
 # Determines the initial sensitivity to cursor movements.
 # Higher values result in slower initial scroll speeds for small movements.
@@ -61,7 +61,6 @@ accumulated_y = 0
 accumulated_x = 0
 current_keys = set()
 
-
 def on_click(x, y, button, pressed):
     global dragging, x_init, y_init, accumulated_y, accumulated_x
 
@@ -75,6 +74,21 @@ def on_click(x, y, button, pressed):
             accumulated_y = 0
             accumulated_x = 0
 
+def on_key_press(key):
+    global toggle_mode, dragging, x_init, y_init
+    current_keys.add(key)
+    if current_keys == TOGGLE_HOTKEY:
+        toggle_mode = not toggle_mode
+        if toggle_mode:
+            x_init, y_init = controller.position
+            dragging = True
+        else:
+            dragging = False
+            accumulated_y = 0
+            accumulated_x = 0
+
+def on_key_release(key):
+    current_keys.discard(key)
 
 def on_move(x, y):
     global x_init, y_init, accumulated_y, accumulated_x
@@ -109,27 +123,22 @@ def on_move(x, y):
             controller.scroll(1 if x_delta > 0 else -1, 0)
             accumulated_x -= 1
 
-        # Reset cursor position to initial
+        # Reset the cursor to the initial position to keep it stationary while scrolling
         controller.position = (x_init, y_init)
 
-
-def on_key_press(key):
-    global toggle_mode, dragging
-    current_keys.add(key)
-    if current_keys == TOGGLE_HOTKEY:
-        toggle_mode = not toggle_mode
-        dragging = toggle_mode
-
-
-def on_key_release(key):
-    current_keys.discard(key)
-
-
 if __name__ == "__main__":
-    with mouse.Listener(
-        on_click=on_click, on_move=on_move
-    ) as m_listener, keyboard.Listener(
-        on_press=on_key_press, on_release=on_key_release
-    ) as k_listener:
+    m_listener = mouse.Listener(on_click=on_click, on_move=on_move)
+    k_listener = keyboard.Listener(on_press=on_key_press, on_release=on_key_release)
+    
+    m_listener.daemon = True
+    k_listener.daemon = True
+
+    m_listener.start()
+    k_listener.start()
+
+    try:
         m_listener.join()
         k_listener.join()
+    except KeyboardInterrupt:
+        pass
+
