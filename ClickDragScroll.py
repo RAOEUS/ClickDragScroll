@@ -1,4 +1,4 @@
-from pynput import mouse
+from pynput import mouse, keyboard
 from pynput.mouse import Button
 from time import sleep
 import math
@@ -10,6 +10,10 @@ import math
 # The mouse button used to initiate the drag-to-scroll action.
 # Options: Button.middle, Button.right
 INITIATE_DRAG_BUTTON = Button.middle
+
+# Hotkey to toggle the drag-to-scroll mode.
+# This example uses CTRL+ALT+T.
+TOGGLE_HOTKEY = {keyboard.Key.ctrl, keyboard.Key.alt, keyboard.KeyCode.from_char("t")}
 
 # Determines the initial sensitivity to cursor movements.
 # Higher values result in slower initial scroll speeds for small movements.
@@ -51,14 +55,17 @@ LOG_POWER = 0.7
 # Initial setup
 controller = mouse.Controller()
 dragging = False
+toggle_mode = False
 x_init, y_init = 0, 0
 accumulated_y = 0
 accumulated_x = 0
+current_keys = set()
+
 
 def on_click(x, y, button, pressed):
     global dragging, x_init, y_init, accumulated_y, accumulated_x
 
-    if button == INITIATE_DRAG_BUTTON:
+    if button == INITIATE_DRAG_BUTTON and not toggle_mode:
         if pressed:
             x_init, y_init = x, y
             sleep(DRAG_ACTIVATION_DELAY)
@@ -67,6 +74,7 @@ def on_click(x, y, button, pressed):
             dragging = False
             accumulated_y = 0
             accumulated_x = 0
+
 
 def on_move(x, y):
     global x_init, y_init, accumulated_y, accumulated_x
@@ -104,7 +112,24 @@ def on_move(x, y):
         # Reset cursor position to initial
         controller.position = (x_init, y_init)
 
-if __name__ == "__main__":
-    with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
-        listener.join()
 
+def on_key_press(key):
+    global toggle_mode, dragging
+    current_keys.add(key)
+    if current_keys == TOGGLE_HOTKEY:
+        toggle_mode = not toggle_mode
+        dragging = toggle_mode
+
+
+def on_key_release(key):
+    current_keys.discard(key)
+
+
+if __name__ == "__main__":
+    with mouse.Listener(
+        on_click=on_click, on_move=on_move
+    ) as m_listener, keyboard.Listener(
+        on_press=on_key_press, on_release=on_key_release
+    ) as k_listener:
+        m_listener.join()
+        k_listener.join()
