@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from pynput import mouse, keyboard
 from pynput.mouse import Button
 from time import sleep
@@ -18,12 +20,7 @@ TOGGLE_HOTKEY = {keyboard.Key.ctrl, keyboard.Key.shift, keyboard.Key.f12}
 # Determines the initial sensitivity to cursor movements.
 # Higher values result in slower initial scroll speeds for small movements.
 # It scales the raw cursor movement speed before the logarithmic operation.
-SLOW_SPEED_FACTOR = 10
-
-# This factor adjusts the acceleration curve of the scroll speed.
-# Values greater than 1 will result in faster acceleration (scroll speed increases more rapidly with cursor speed).
-# Values less than 1 will result in slower acceleration.
-ACCELERATION_FACTOR = 1.05
+SLOW_SPEED_FACTOR = 30
 
 # The minimum threshold for the scroll speed to initiate a scroll event.
 # Typically set to 0 to ensure even minimal cursor movement contributes to scrolling.
@@ -39,12 +36,12 @@ REVERSE_SCROLLING = False
 
 # Multiplier applied to the logarithmic scroll speed.
 # Adjusting this will scale the overall scroll speed. Lower values will slow down scrolling, and higher values will speed it up.
-SCROLL_SENSITIVITY = 0.7
+SCROLL_SENSITIVITY = 0.5
 
 # Adjusts the curvature of the logarithmic function used to calculate scroll speed.
 # Values less than 1 cause the function to increase more slowly, leading to slower scroll speeds at slower cursor speeds.
 # This provides granular control over how the scroll speed responds to cursor speed.
-LOG_POWER = 0.7
+LOG_POWER = 0.8
 
 
 # -----
