@@ -26,6 +26,7 @@ ExclusionList := []
 
 ; Enable or disable double-clicking the InitiateDragButton to toggle scroll mode.
 EnableDoubleClickToggle := true ; Set to true to enable, false to disable
+DoubleClickSpeed := 300 ; Maximum time (in milliseconds) between clicks to count as a double-click
 
 ; Enable or disable the hotkey for toggling scroll mode.
 EnableHotkeyToggle := true ; Set to true to enable, false to disable
@@ -109,7 +110,7 @@ InitiateDragCheck:
     TimeSinceLastClick := CurrentTime - LastClickTime
     LastClickTime := CurrentTime ; Update the time of the last click
 
-    if (TimeSinceLastClick < 500) { ; If the time since the last click is less than 500ms
+    if (TimeSinceLastClick < DoubleClickSpeed) { ; If the time since the last click is less than DoubleClickSpeed
       Goto, ToggleDragToScroll ; Jump to the ToggleDragToScroll label
       return
     }
