@@ -3,6 +3,7 @@
 - `ClickDragScroll.ahk` is for AutoHotKey on Windows
 - `ClickDragScroll.py` is for Python on Linux (do not use on Windows)
   - I have no clue if this works on Mac or not, because I don't have a Mac to test on
+  - Untested on Wayland, and unlikely to work. I recommend using X11, if you can.
 
 ## How To Use
 - Click and hold a mouse button (default Middle, can be changed in settings) and then move the cursor to scroll
